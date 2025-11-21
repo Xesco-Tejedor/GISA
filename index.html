@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Meta-Apps para Investigadores</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+        }
+        #drop-area {
+            border: 2px dashed #9ca3af;
+            transition: all 0.2s;
+        }
+        #drop-area.highlight {
+            border-color: #10b981;
+            background-color: #f0fff4;
+        }
+        .loading-spinner {
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 md:p-12 min-h-screen flex items-start justify-center">
+
+    <div class="w-full max-w-4xl bg-white shadow-xl rounded-xl p-6 md:p-10">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-700">📚 Generador de Ideas Sorpresa (Académico)</h1>
+            <p class="mt-2 text-gray-600">Sube una imagen para obtener un concepto de aplicación inesperada para lectores, bibliotecarios o investigadores.</p>
+        </header>
+
+        <!-- Input Area -->
+        <div id="input-section">
+            <div id="drop-area" class="flex flex-col items-center justify-center p-8 border-4 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500">
+                <input type="file" id="fileElem" accept="image/*" class="hidden" onchange="handleFiles(this.files)">
+                <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 014 4v2a3 3 0 00-3-3l-1.5 1.5M4 16h4m-4 0l4 0m0 0l-4 0m4 0V8m0 8l0 0M16 6h4m-4 0l4 0m0 0l-4 0m4 0V8m0 8l0 0"></path></svg>
+                <p class="text-lg font-semibold text-gray-600">Arrastra una imagen aquí</p>
+                <p class="text-sm text-gray-500 mt-1">o haz click para seleccionar (JPG, PNG)</p>
+                <button onclick="document.getElementById('fileElem').click()" class="mt-4 px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-150 shadow-md">Seleccionar Imagen</button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-section" class="hidden text-center p-10">
+            <div class="loading-spinner w-12 h-12 border-4 border-gray-200 rounded-full mx-auto"></div>
+            <p class="mt-4 text-lg text-gray-600 font-medium">Analizando y pensando lateralmente...</p>
+            <p class="text-sm text-gray-500">Generando un concepto sorprendente para la comunidad académica.</p>
+        </div>
+
+        <!-- Result Area -->
+        <div id="result-section" class="hidden mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-green-700 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1-1h6l-1 1l-.75-3M3 17h18a3 3 0 00-3-3H6a3 3 0 00-3 3zM6 10h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v3a2 2 0 002 2z"></path></svg>
+                Prompt Generado (en inglés):
+            </h2>
+            <div class="bg-white p-4 rounded-md shadow-inner">
+                <pre id="generated-prompt" class="whitespace-pre-wrap text-sm text-gray-800 font-mono"></pre>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <!-- Confirmation Message -->
+                <p id="copy-confirmation" class="text-sm text-green-600 font-medium mb-3 hidden">¡Prompt copiado al portapapeles! Abriendo AI Studio...</p>
+
+                <button id="develop-button" 
+                    class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition duration-200 text-lg flex items-center mx-auto"
+                    onclick="copyPromptAndNavigate()"
+                    title="Copia el prompt y abre Google AI Studio en una nueva pestaña para la creación de apps."
+                >
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    ¿Quieres que desarrollemos esta app?
+                </button>
+                <p class="mt-2 text-xs text-gray-500">El prompt está en tu portapapeles. Recuerda **pegarlo manualmente** en el campo de AI Studio.</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-section" class="hidden mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" role="alert">
+            <p id="error-message" class="font-medium"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Global Constants
+        const apiKey = ""; // Canvas provides the API key at runtime if left empty
+        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+        
+        // DOM Elements
+        const dropArea = document.getElementById('drop-area');
+        const inputSection = document.getElementById('input-section');
+        const loadingSection = document.getElementById('loading-section');
+        const resultSection = document.getElementById('result-section');
+        const generatedPrompt = document.getElementById('generated-prompt');
+        const errorSection = document.getElementById('error-section');
+        const errorMessage = document.getElementById('error-message');
+        const copyConfirmation = document.getElementById('copy-confirmation');
+
+        // --- Utility Functions ---
+        function showSection(section, isVisible) {
+            section.classList.toggle('hidden', !isVisible);
+        }
+
+        function displayError(message) {
+            errorMessage.textContent = message;
+            showSection(inputSection, true);
+            showSection(loadingSection, false);
+            showSection(resultSection, false);
+            showSection(errorSection, true);
+        }
+
+        // Base64 Converter
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- Drop Zone Handlers ---
+        dropArea.addEventListener('dragenter', e => { e.preventDefault(); dropArea.classList.add('highlight'); });
+        dropArea.addEventListener('dragleave', e => { e.preventDefault(); dropArea.classList.remove('highlight'); });
+        dropArea.addEventListener('dragover', e => { e.preventDefault(); });
+        dropArea.addEventListener('drop', e => {
+            e.preventDefault();
+            dropArea.classList.remove('highlight');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        // --- Action Function: Copy and Navigate ---
+        window.copyPromptAndNavigate = async function() {
+            const promptText = generatedPrompt.textContent.trim();
+            if (!promptText) {
+                displayError("No hay un prompt generado para copiar.");
+                return;
+            }
+
+            try {
+                // Copy to clipboard
+                await navigator.clipboard.writeText(promptText);
+                copyConfirmation.textContent = "¡Prompt copiado al portapapeles! Abriendo AI Studio...";
+                copyConfirmation.classList.remove('hidden');
+                
+                // Hide confirmation after a delay
+                setTimeout(() => {
+                    copyConfirmation.classList.add('hidden');
+                }, 3000);
+            } catch (err) {
+                // Fallback for security errors
+                console.warn("Failed to copy using clipboard API. Instructing user to copy manually.", err);
+                copyConfirmation.textContent = "Error al copiar automáticamente. ¡Copia el texto del prompt y luego presiona el botón!";
+                copyConfirmation.classList.remove('hidden');
+            }
+
+            // Open the new tab and navigate to /app/apps
+            window.open('https://aistudio.google.com/app/apps', '_blank');
+        }
+
+        // --- Main Logic ---
+        window.handleFiles = async function(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                displayError("Por favor, sube solo archivos de imagen.");
+                return;
+            }
+
+            showSection(inputSection, false);
+            showSection(errorSection, false);
+            showSection(loadingSection, true);
+            showSection(resultSection, false);
+
+            try {
+                const base64Data = await fileToBase64(file);
+                await generateMetaPrompt(base64Data, file.type);
+            } catch (error) {
+                console.error("Error en el manejo de archivos o API:", error);
+                displayError("Ocurrió un error al procesar la imagen o al llamar a la API. Inténtalo de nuevo.");
+            }
+        }
+
+        async function generateMetaPrompt(base64Data, mimeType) {
+            // Get current day of the week in Spanish for context
+            const dayOfWeek = new Date().toLocaleDateString('es-ES', { weekday: 'long' });
+
+            // User prompt now requests English output
+            const userPrompt = `Analyze the mood, dominant colors, and main objects in this image. Then, using lateral thinking, invent a concept for a mini-app for 'librarians, readers, or researchers' that is surprising and *unrelated* to the literal content or theme of the image. The current day of the week is: ${dayOfWeek}. The app concept must be an abstract metaphor of what you see. Generate the professional prompt to build this new application. The final output MUST be in English.`;
+            
+            // System prompt now requests English output
+            const systemPrompt = `You are a creatively lateral idea generator specializing in applications for librarians, readers, and academics. Your task is to analyze the visual context of the provided image (mood, colors, objects) along with the current day of the week and, using lateral thinking, invent a completely new mini-app idea for the academic/research sector. The app idea must be *surprising, UNRELATED* to food, cooking, or the literal content of the image. For example, if you see a peaceful image, you might generate an app for 'Data Crisis Management'. The result *must be strictly* only the text of the professional prompt needed to build that new app (no introduction, conclusion, or additional explanation). The final output MUST be in English.`;
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: userPrompt },
+                            {
+                                inlineData: {
+                                    mimeType: mimeType,
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }
+                ],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            let maxRetries = 3;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(`API returned status ${response.status}: ${JSON.stringify(errorBody)}`);
+                    }
+
+                    const result = await response.json();
+                    const promptText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (promptText) {
+                        generatedPrompt.textContent = promptText.trim();
+                        showSection(loadingSection, false);
+                        showSection(resultSection, true);
+                        return;
+                    } else {
+                        throw new Error("API response was missing the generated text.");
+                    }
+                } catch (error) {
+                    if (attempt < maxRetries - 1) {
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
