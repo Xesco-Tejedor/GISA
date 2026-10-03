@@ -90,9 +90,11 @@
 
     <script type="module">
         // Global Constants
-        // Clave de Gemini restringida al dominio xesco-tejedor.github.io y con cuota limitada. Se rellena al publicar.
+        // La clave de Gemini NO va en este archivo: vive en un servidor intermedio (proxy).
+        // Se rellena con la URL del proxy al publicarlo.
+        const PROXY_URL = "";
         const apiKey = "";
-        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
+        const apiUrl = PROXY_URL || "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
         
         // DOM Elements
         const dropArea = document.getElementById('drop-area');
@@ -176,8 +178,8 @@
                 return;
             }
 
-            if (!apiKey) {
-                displayError("La generación de ideas no está activada todavía: falta la clave de Gemini.");
+            if (!PROXY_URL && !apiKey) {
+                displayError("La generación de ideas no está activada todavía: falta configurar el servidor de Gemini.");
                 return;
             }
 
@@ -230,7 +232,7 @@
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+                        headers: PROXY_URL ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify(payload)
                     });
 
