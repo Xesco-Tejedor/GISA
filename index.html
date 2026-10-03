@@ -68,18 +68,20 @@
             </div>
             
             <div class="mt-6 text-center">
-                <!-- Confirmation Message -->
-                <p id="copy-confirmation" class="text-sm text-green-600 font-medium mb-3 hidden">¡Prompt copiado al portapapeles! Abriendo AI Studio...</p>
-
-                <button id="develop-button" 
-                    class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition duration-200 text-lg flex items-center mx-auto"
-                    onclick="copyPromptAndNavigate()"
-                    title="Abre Google AI Studio (Build, gratuito) con este prompt ya escrito para que genere la app."
-                >
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                    Construir esta app gratis en AI Studio
-                </button>
-                <p class="mt-2 text-xs text-gray-500">Se abre Google AI Studio con el prompt ya escrito; pulsa «Build» y Gemini generará la app. Es gratis con tu cuenta de Google. El prompt también queda copiado por si hace falta.</p>
+                <p id="copy-confirmation" class="text-sm text-green-700 font-medium mb-3 hidden" role="status" aria-live="polite"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 bg-white rounded-lg border border-blue-200">
+                        <button id="develop-button" type="button" onclick="copyPromptAndNavigate('aistudio')" class="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-200">Construir gratis en AI Studio</button>
+                        <p class="mt-2 text-sm text-gray-600">Opción principal · Gemini configurado en AI Studio.</p>
+                        <p class="mt-2 text-xs text-gray-500">Pulsa &quot;Build&quot; con tu cuenta de Google. Publicar puede requerir facturación; al exportar a otro alojamiento debes configurar tu clave de Gemini.</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg border border-violet-200">
+                        <button id="bolt-button" type="button" onclick="copyPromptAndNavigate('bolt')" class="w-full px-4 py-3 bg-violet-600 text-white font-semibold rounded-lg shadow-md hover:bg-violet-700 transition duration-200">Construir en Bolt · hosting gratis</button>
+                        <p class="mt-2 text-sm text-gray-600">Alternativa · enlace público con el plan gratuito.</p>
+                        <p class="mt-2 text-xs text-gray-500">Necesitas una cuenta de Bolt. Pulsa &quot;Build now&quot; y después &quot;Publish&quot;. Hay límites de generación y tráfico; si la app usa Gemini, configura una clave como secreto, nunca en el código público.</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-xs text-gray-500">La idea se abre ya escrita y también se copia como respaldo. No se crea ni se publica nada hasta que lo confirmes en la plataforma.</p>
             </div>
             <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap justify-center gap-2">
                 <button type="button" onclick="newPhoto()" class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-150 shadow-md">📷 Nueva foto</button>
@@ -208,13 +210,18 @@
         window.newPhoto = function() { resetApp(); openCamera(); }
         window.newImage = function() { resetApp(); document.getElementById('fileElem').click(); }
 
-        // --- Action Function: Copy and Navigate ---
-        window.copyPromptAndNavigate = async function() {
+        // Open before awaiting clipboard so mobile browsers do not block the new tab.
+        window.copyPromptAndNavigate = async function(target = 'aistudio') {
             const promptText = generatedPrompt.textContent.trim();
             if (!promptText) {
                 displayError("No hay un prompt generado para copiar.");
                 return;
             }
+            const isBolt = target === 'bolt';
+            const base = isBolt ? 'https://bolt.new/' : 'https://aistudio.google.com/apps';
+            const url = base + '?prompt=' + encodeURIComponent(promptText);
+            const fits = url.length < 7000;
+            window.open(fits ? url : base, '_blank', 'noopener,noreferrer');
             let copied = false;
             try {
                 await navigator.clipboard.writeText(promptText);
@@ -222,14 +229,12 @@
             } catch (err) {
                 console.warn("No se pudo copiar al portapapeles.", err);
             }
-            // AI Studio Build (gratuito) acepta el prompt en la URL y lo deja escrito; solo hay que pulsar "Build".
-            const url = 'https://aistudio.google.com/apps?prompt=' + encodeURIComponent(promptText);
-            const fits = url.length < 7000;
+            const name = isBolt ? 'Bolt' : 'AI Studio';
+            const action = isBolt ? 'Build now' : 'Build';
             copyConfirmation.textContent = fits
-                ? "Abriendo Google AI Studio con el prompt ya escrito. Pulsa «Build» (necesitas una cuenta de Google; es gratis)."
-                : (copied ? "Prompt copiado. Pégalo en AI Studio y pulsa «Build»." : "Copia el prompt manualmente y pégalo en AI Studio.");
+                ? 'Abriendo ' + name + ' con la idea escrita. Inicia sesión si hace falta y pulsa "' + action + '". ' + (copied ? 'También se ha copiado el prompt por si necesitas pegarlo.' : 'Si no aparece, copia el texto de arriba y pégalo.')
+                : (copied ? 'Prompt copiado. Pégalo en ' + name + ' y pulsa "' + action + '".' : 'Copia el texto de arriba y pégalo en ' + name + '; pulsa "' + action + '".');
             copyConfirmation.classList.remove('hidden');
-            window.open(fits ? url : 'https://aistudio.google.com/apps', '_blank');
         }
 
         // --- Main Logic ---
