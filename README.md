@@ -25,7 +25,7 @@ Este proyecto es un **solo archivo HTML** y utiliza tecnologías web estándar:
 
   * **HTML5 y JavaScript:** Para la estructura y la lógica principal.
   * **Tailwind CSS:** Para un diseño moderno, responsivo y de carga rápida.
-  * **API de Gemini (gemini-2.5-flash-preview-09-2025):** Para el análisis de imágenes y la generación creativa de texto, llamada mediante `fetch`.
+  * **API de Gemini (gemini-3.8-flash):** Para el análisis de imágenes y la generación creativa de texto, llamada mediante `fetch`.
 
 ### 💻 Instalación y Uso
 
@@ -40,21 +40,9 @@ Dado que el proyecto es un solo archivo `index.html` con *scripts* en línea, la
 
 #### Configuración de la API
 
-El archivo `index.html` tiene la siguiente línea en el bloque `<script type="module">`:
+Demo: https://xesco-tejedor.github.io/GISA/
 
-```javascript
-const apiKey = ""; // Canvas provides the API key at runtime if left empty
-```
-
-Si ejecutas esto localmente, necesitarás una clave de API de Gemini.
-
-1.  Obtén tu clave en Google AI Studio.
-2.  Reemplaza la línea con tu clave:
-    ```javascript
-    const apiKey = "TU_CLAVE_DE_API_AQUÍ"; // ¡Reemplaza por tu clave real!
-    ```
-
-**Nota:** Si este código se ejecuta en un entorno de Google (como un *Canvas* o una aplicación interna), la clave de API puede ser proporcionada automáticamente por el entorno si se deja vacía.
+La constante `apiKey` de `index.html` contiene una clave de Gemini restringida al dominio `xesco-tejedor.github.io` y con cuota limitada. En una web estática la clave es visible, por eso no debe ser una clave sin restricciones. Si lo ejecutas en local o en otro dominio, crea la tuya en https://aistudio.google.com/apikey y sustituye la línea `const apiKey = "..."`.
 
 ### 📝 Cómo Contribuir
 
