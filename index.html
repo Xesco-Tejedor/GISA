@@ -90,8 +90,9 @@
 
     <script type="module">
         // Global Constants
-        const apiKey = ""; // Canvas provides the API key at runtime if left empty
-        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+        // Clave de Gemini restringida al dominio xesco-tejedor.github.io y con cuota limitada. Se rellena al publicar.
+        const apiKey = "";
+        const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
         
         // DOM Elements
         const dropArea = document.getElementById('drop-area');
@@ -175,6 +176,11 @@
                 return;
             }
 
+            if (!apiKey) {
+                displayError("La generación de ideas no está activada todavía: falta la clave de Gemini.");
+                return;
+            }
+
             showSection(inputSection, false);
             showSection(errorSection, false);
             showSection(loadingSection, true);
@@ -185,7 +191,7 @@
                 await generateMetaPrompt(base64Data, file.type);
             } catch (error) {
                 console.error("Error en el manejo de archivos o API:", error);
-                displayError("Ocurrió un error al procesar la imagen o al llamar a la API. Inténtalo de nuevo.");
+                displayError(error && error.message && error.message.startsWith("Límite") ? error.message : "Ocurrió un error al procesar la imagen o al llamar a la API. Inténtalo de nuevo.");
             }
         }
 
@@ -222,12 +228,15 @@
             let maxRetries = 3;
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
-                    const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify(payload)
                     });
 
+                    if (response.status === 429) {
+                        throw new Error("Límite de uso alcanzado. Inténtalo más tarde.");
+                    }
                     if (!response.ok) {
                         const errorBody = await response.json();
                         throw new Error(`API returned status ${response.status}: ${JSON.stringify(errorBody)}`);
