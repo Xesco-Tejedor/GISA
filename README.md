@@ -42,7 +42,7 @@ Dado que el proyecto es un solo archivo `index.html` con *scripts* en línea, la
 
 Demo: https://xesco-tejedor.github.io/GISA/
 
-La constante `apiKey` de `index.html` contiene una clave de Gemini restringida al dominio `xesco-tejedor.github.io` y con cuota limitada. En una web estática la clave es visible, por eso no debe ser una clave sin restricciones. Si lo ejecutas en local o en otro dominio, crea la tuya en https://aistudio.google.com/apikey y sustituye la línea `const apiKey = "..."`.
+La constante `apiKey` de `index.html` debe contener una clave de Gemini. En una web estática esa clave es visible para cualquiera que abra el código fuente, así que debe ser una clave propia con restricción de sitio web (HTTP referrer) y cuota limitada en Google Cloud. Crea la tuya en https://aistudio.google.com/apikey y sustituye la línea `const apiKey = "..."`.
 
 ### 📝 Cómo Contribuir
 
