@@ -224,7 +224,8 @@
                 ],
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
-                }
+                },
+                generationConfig: { thinkingConfig: { thinkingLevel: "low" } }
             };
 
             let maxRetries = 3;
