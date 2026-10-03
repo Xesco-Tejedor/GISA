@@ -35,17 +35,18 @@
     <div class="w-full max-w-4xl bg-white shadow-xl rounded-xl p-6 md:p-10">
         <header class="text-center mb-10">
             <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-700">📚 Generador de Ideas Sorpresa (Académico)</h1>
-            <p class="mt-2 text-gray-600">Sube una imagen para obtener un concepto de aplicación inesperada para lectores, bibliotecarios o investigadores.</p>
+            <p class="mt-2 text-gray-600">Sube una imagen o haz una foto con la cámara para obtener un concepto de aplicación inesperada para lectores, bibliotecarios o investigadores.</p>
         </header>
 
         <!-- Input Area -->
         <div id="input-section">
             <div id="drop-area" class="flex flex-col items-center justify-center p-8 border-4 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500">
                 <input type="file" id="fileElem" accept="image/*" class="hidden" onchange="handleFiles(this.files)">
+                <input type="file" id="cameraElem" accept="image/*" capture="environment" class="hidden" onchange="handleFiles(this.files)">
                 <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 014 4v2a3 3 0 00-3-3l-1.5 1.5M4 16h4m-4 0l4 0m0 0l-4 0m4 0V8m0 8l0 0M16 6h4m-4 0l4 0m0 0l-4 0m4 0V8m0 8l0 0"></path></svg>
                 <p class="text-lg font-semibold text-gray-600">Arrastra una imagen aquí</p>
                 <p class="text-sm text-gray-500 mt-1">o haz click para seleccionar (JPG, PNG)</p>
-                <button onclick="document.getElementById('fileElem').click()" class="mt-4 px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-150 shadow-md">Seleccionar Imagen</button>
+                <div class="flex flex-wrap justify-center"><button onclick="event.stopPropagation();document.getElementById('fileElem').click()" class="mt-4 px-4 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-150 shadow-md">Seleccionar Imagen</button><button type="button" onclick="event.stopPropagation();openCamera()" class="mt-4 ml-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-150 shadow-md">📷 Usar la cámara</button></div>
             </div>
         </div>
 
@@ -73,12 +74,12 @@
                 <button id="develop-button" 
                     class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition duration-200 text-lg flex items-center mx-auto"
                     onclick="copyPromptAndNavigate()"
-                    title="Copia el prompt y abre Google AI Studio en una nueva pestaña para la creación de apps."
+                    title="Abre Google AI Studio (Build, gratuito) con este prompt ya escrito para que genere la app."
                 >
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                    ¿Quieres que desarrollemos esta app?
+                    Construir esta app gratis en AI Studio
                 </button>
-                <p class="mt-2 text-xs text-gray-500">El prompt está en tu portapapeles. Recuerda **pegarlo manualmente** en el campo de AI Studio.</p>
+                <p class="mt-2 text-xs text-gray-500">Se abre Google AI Studio con el prompt ya escrito; pulsa «Build» y Gemini generará la app. Es gratis con tu cuenta de Google. El prompt también queda copiado por si hace falta.</p>
             </div>
         </div>
 
@@ -88,6 +89,15 @@
         </div>
     </div>
 
+    <!-- Camera overlay -->
+    <div id="camera-overlay" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col items-center justify-center p-4">
+        <video id="camera-video" autoplay playsinline muted class="max-h-[70vh] w-full max-w-2xl rounded-lg bg-black"></video>
+        <p id="camera-msg" class="text-white text-sm mt-3"></p>
+        <div class="mt-4 flex gap-3">
+            <button type="button" onclick="takePhoto()" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">📸 Hacer foto</button>
+            <button type="button" onclick="closeCamera()" class="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300">Cancelar</button>
+        </div>
+    </div>
     <script type="module">
         // Global Constants
         // La clave de Gemini NO va en este archivo: vive en un servidor intermedio (proxy).
@@ -140,6 +150,45 @@
             handleFiles(files);
         });
 
+        // --- Cámara del dispositivo ---
+        let camStream = null;
+        window.openCamera = async function() {
+            const overlay = document.getElementById('camera-overlay');
+            const video = document.getElementById('camera-video');
+            const msg = document.getElementById('camera-msg');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                document.getElementById('cameraElem').click();
+                return;
+            }
+            try {
+                camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+                video.srcObject = camStream;
+                msg.textContent = 'Apunta al objeto y pulsa "Hacer foto".';
+                overlay.classList.remove('hidden');
+            } catch (err) {
+                console.warn('Cámara no disponible, uso la cámara nativa del móvil.', err);
+                document.getElementById('cameraElem').click();
+            }
+        }
+        window.closeCamera = function() {
+            if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+            document.getElementById('camera-video').srcObject = null;
+            document.getElementById('camera-overlay').classList.add('hidden');
+        }
+        window.takePhoto = function() {
+            const video = document.getElementById('camera-video');
+            if (!video.videoWidth) return;
+            const scale = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(video.videoWidth * scale);
+            canvas.height = Math.round(video.videoHeight * scale);
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                closeCamera();
+                if (blob) handleFiles([new File([blob], 'foto.jpg', { type: 'image/jpeg' })]);
+            }, 'image/jpeg', 0.85);
+        }
+
         // --- Action Function: Copy and Navigate ---
         window.copyPromptAndNavigate = async function() {
             const promptText = generatedPrompt.textContent.trim();
@@ -147,26 +196,21 @@
                 displayError("No hay un prompt generado para copiar.");
                 return;
             }
-
+            let copied = false;
             try {
-                // Copy to clipboard
                 await navigator.clipboard.writeText(promptText);
-                copyConfirmation.textContent = "¡Prompt copiado al portapapeles! Abriendo AI Studio...";
-                copyConfirmation.classList.remove('hidden');
-                
-                // Hide confirmation after a delay
-                setTimeout(() => {
-                    copyConfirmation.classList.add('hidden');
-                }, 3000);
+                copied = true;
             } catch (err) {
-                // Fallback for security errors
-                console.warn("Failed to copy using clipboard API. Instructing user to copy manually.", err);
-                copyConfirmation.textContent = "Error al copiar automáticamente. ¡Copia el texto del prompt y luego presiona el botón!";
-                copyConfirmation.classList.remove('hidden');
+                console.warn("No se pudo copiar al portapapeles.", err);
             }
-
-            // Open the new tab and navigate to /app/apps
-            window.open('https://aistudio.google.com/app/apps', '_blank');
+            // AI Studio Build (gratuito) acepta el prompt en la URL y lo deja escrito; solo hay que pulsar "Build".
+            const url = 'https://aistudio.google.com/apps?prompt=' + encodeURIComponent(promptText);
+            const fits = url.length < 7000;
+            copyConfirmation.textContent = fits
+                ? "Abriendo Google AI Studio con el prompt ya escrito. Pulsa «Build» (necesitas una cuenta de Google; es gratis)."
+                : (copied ? "Prompt copiado. Pégalo en AI Studio y pulsa «Build»." : "Copia el prompt manualmente y pégalo en AI Studio.");
+            copyConfirmation.classList.remove('hidden');
+            window.open(fits ? url : 'https://aistudio.google.com/apps', '_blank');
         }
 
         // --- Main Logic ---
@@ -269,3 +313,4 @@
     </script>
 </body>
 </html>
+
