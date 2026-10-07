@@ -286,7 +286,7 @@
                 await generateMetaPrompt(base64Data, file.type);
             } catch (error) {
                 console.error("Error en el manejo de archivos o API:", error);
-                displayError(error && error.message && error.message.startsWith("Límite") ? error.message : "Ocurrió un error al procesar la imagen o al llamar a la API. Inténtalo de nuevo.");
+                displayError(error && (error.name === "TimeoutError" || error.name === "AbortError") ? "El servicio de IA no respondió a tiempo. Vuelve a intentarlo en unos minutos." : error && error.message && error.message.startsWith("Límite") ? error.message : "Ocurrió un error al procesar la imagen o al llamar a la API. Inténtalo de nuevo.");
             }
         }
 
@@ -321,10 +321,11 @@
                 generationConfig: { thinkingConfig: { thinkingLevel: "low" } }
             };
 
-            let maxRetries = 3;
+            let maxRetries = 1;
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
                     const response = await fetch(apiUrl, {
+                        signal: AbortSignal.timeout(45000),
                         method: 'POST',
                         headers: PROXY_URL ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify(payload)
