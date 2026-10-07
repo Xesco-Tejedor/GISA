@@ -134,7 +134,7 @@
         // Global Constants
         // La clave de Gemini NO va en este archivo: vive en un servidor intermedio (proxy).
         // Se rellena con la URL del proxy al publicarlo.
-        const PROXY_URL = "https://gemini-proxy.francesc-adria-perello.workers.dev/";
+        const PROXY_URL = "https://gemini-proxy.francesc-adria-perello.workers.dev/openrouter";
         const apiKey = "";
         const apiUrl = PROXY_URL || "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent";
         
@@ -301,6 +301,7 @@
             const systemPrompt = `You are a creatively lateral idea generator specializing in applications for librarians, readers, and academics. Your task is to analyze the visual context of the provided image (mood, colors, objects) along with the current day of the week and, using lateral thinking, invent a completely new mini-app idea for the academic/research sector. The app idea must be *surprising, UNRELATED* to food, cooking, or the literal content of the image. For example, if you see a peaceful image, you might generate an app for 'Data Crisis Management'. The result *must be strictly* only the text of the professional prompt needed to build that new app (no introduction, conclusion, or additional explanation). The final output MUST be in English.`;
 
             const payload = {
+                freeModel: "google/gemma-4-31b-it:free",
                 contents: [
                     {
                         role: "user",
@@ -316,7 +317,7 @@
                     }
                 ],
                 systemInstruction: {
-                    parts: [{ text: systemPrompt }]
+                    parts: [{ text: systemPrompt + ' Return a JSON object with one field named "prompt". The value of "prompt" must be the full professional build prompt in English.' }]
                 },
                 generationConfig: { thinkingConfig: { thinkingLevel: "low" } }
             };
@@ -340,7 +341,15 @@
                     }
 
                     const result = await response.json();
-                    const promptText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    let promptText = rawText;
+                    if (rawText) {
+                        const cleaned = rawText.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+                        try {
+                            const parsed = JSON.parse(cleaned);
+                            promptText = parsed.prompt || parsed.build_prompt || Object.values(parsed).find(v => typeof v === 'string');
+                        } catch { promptText = cleaned; }
+                    }
 
                     if (promptText) {
                         generatedPrompt.textContent = promptText.trim();
