@@ -322,11 +322,12 @@
                 generationConfig: { thinkingConfig: { thinkingLevel: "low" } }
             };
 
-            let maxRetries = 1;
+            let maxRetries = 2;
+            const deadline = Date.now() + 45000;
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
                     const response = await fetch(apiUrl, {
-                        signal: AbortSignal.timeout(45000),
+                        signal: AbortSignal.timeout(Math.max(1, deadline - Date.now())),
                         method: 'POST',
                         headers: PROXY_URL ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
                         body: JSON.stringify(payload)
@@ -360,7 +361,7 @@
                         throw new Error("API response was missing the generated text.");
                     }
                 } catch (error) {
-                    if (attempt < maxRetries - 1) {
+                    if (attempt < maxRetries - 1 && Date.now() < deadline - 2500 && error.name !== "TimeoutError" && error.name !== "AbortError" && !error.message.startsWith("Límite")) {
                         const delay = Math.pow(2, attempt) * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
