@@ -4,7 +4,7 @@
 
 ## Una imagen. Otra mirada. Una app inesperada.
 
-El **Generador de Ideas Sorpresa (Académico)** es una herramienta que utiliza la visión y la creatividad lateral de Gemini para generar conceptos de meta-aplicaciones inesperadas para la comunidad de investigadores, lectores y bibliotecarios.
+El **Generador de Ideas Sorpresa (Académico)** es una herramienta que utiliza la visión y la creatividad lateral de modelos de IA gratuitos para generar conceptos de meta-aplicaciones inesperadas para la comunidad de investigadores, lectores y bibliotecarios.
 
 El acrónimo del proyecto es **GISA** (Generador de Ideas Sorpresa (Académico)).
 
@@ -22,7 +22,7 @@ El concepto de la aplicación es una **metáfora abstracta** de lo que se ve, as
   * **Cámara y navegación:** Usa la cámara del dispositivo, vuelve al inicio o empieza con otra imagen o una nueva foto.
 
   * **Entrada Visual:** Sube cualquier imagen (JPG, PNG) para iniciar el proceso creativo.
-  * **Creatividad Lateral:** Utiliza el modelo Gemini con instrucciones de sistema diseñadas para el pensamiento abstracto y la generación de metáforas.
+  * **Creatividad Lateral:** Utiliza modelos de visión gratuitos de OpenRouter con instrucciones de sistema diseñadas para el pensamiento abstracto y la generación de metáforas.
   * **Output Profesional:** Genera directamente el *prompt* en **inglés** listo para ser utilizado en Google AI Studio (o cualquier herramienta de desarrollo impulsada por IA).
   * **Construcción:** Copia el *prompt* y abre AI Studio o Bolt con la idea prellenada. GISA no crea ni publica automáticamente una app. Los límites y las condiciones de publicación dependen de cada plataforma.
 
@@ -32,7 +32,7 @@ Este proyecto es un **solo archivo HTML** y utiliza tecnologías web estándar:
 
   * **HTML5 y JavaScript:** Para la estructura y la lógica principal.
   * **Tailwind CSS:** Para un diseño moderno, responsivo y de carga rápida.
-  * **API de Gemini (gemini-3.8-flash):** Para el análisis de imágenes y la generación creativa de texto, llamada mediante `fetch`.
+  * **OpenRouter gratuito:** Análisis de imágenes y generación creativa mediante un servidor intermediario. La ruta selecciona modelos de visión `:free` y puede usar una alternativa gratuita cuando el primero no está disponible.
 
 ### 💻 Instalación y Uso
 
@@ -49,7 +49,7 @@ Dado que el proyecto es un solo archivo `index.html` con *scripts* en línea, la
 
 Demo: https://xesco-tejedor.github.io/GISA/
 
-La clave de Gemini no está en el código público. La web llama a un pequeño servidor intermedio (proxy) que guarda la clave como secreto y reenvía la petición a Gemini; su URL va en la constante `PROXY_URL` de `index.html`. Para ejecutarlo por tu cuenta, o bien despliegas un proxy equivalente, o bien (solo en local) pones tu propia clave de https://aistudio.google.com/apikey en `apiKey` y no la subes a ningún repositorio.
+No necesitas pegar ninguna clave para usar la demo. La clave de OpenRouter vive como secreto en el servidor intermediario, nunca en el código público. Su ruta `/openrouter` va en `PROXY_URL`. Para alojar tu propia instancia, despliega un servidor equivalente con los secretos fuera del navegador. La espera se limita a 45 segundos: si el servicio no responde, se muestra un aviso y puedes volver a intentarlo.
 
 ### 📝 Cómo Contribuir
 
