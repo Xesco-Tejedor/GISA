@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/gisa-amber.svg" alt="GISA · Generador de Ideas Sorpresa · Xesco Tejedor" width="100%"></p>
+<p align="center"><img src="assets/assets/gisa-amber.svg" alt="GISA · Generador de Ideas Sorpresa · Xesco Tejedor" width="100%"></p>
 
 <p align="center"><a href="https://xesco-tejedor.github.io/GISA/"><img src="https://img.shields.io/badge/ABRIR-GISA-ffb800?style=for-the-badge&amp;labelColor=161215" alt="Abrir GISA"></a></p>
 
