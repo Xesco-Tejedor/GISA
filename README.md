@@ -1,6 +1,10 @@
-## 📚 Generador de Ideas Sorpresa (Académico) - GISA
+<p align="center"><img src="assets/gisa-amber.svg" alt="GISA · Generador de Ideas Sorpresa · Xesco Tejedor" width="100%"></p>
 
-¡Bienvenido al repositorio del **Generador de Ideas Sorpresa (Académico)**, una herramienta que utiliza la visión y la creatividad lateral de Gemini para generar conceptos de meta-aplicaciones inesperadas para la comunidad de investigadores, lectores y bibliotecarios\!
+<p align="center"><a href="https://xesco-tejedor.github.io/GISA/"><img src="https://img.shields.io/badge/ABRIR-GISA-ffb800?style=for-the-badge&amp;labelColor=161215" alt="Abrir GISA"></a></p>
+
+## Una imagen. Otra mirada. Una app inesperada.
+
+El **Generador de Ideas Sorpresa (Académico)** es una herramienta que utiliza la visión y la creatividad lateral de Gemini para generar conceptos de meta-aplicaciones inesperadas para la comunidad de investigadores, lectores y bibliotecarios.
 
 El acrónimo del proyecto es **GISA** (Generador de Ideas Sorpresa (Académico)).
 
@@ -14,10 +18,13 @@ El concepto de la aplicación es una **metáfora abstracta** de lo que se ve, as
 
 ### ✨ Características
 
+  * **Identidad ámbar:** Fondos carbón y burdeos, acento #ffb800, Space Grotesk, luz suave y movimiento discreto, como el portfolio de Xesco Tejedor. Respeta la preferencia de movimiento reducido.
+  * **Cámara y navegación:** Usa la cámara del dispositivo, vuelve al inicio o empieza con otra imagen o una nueva foto.
+
   * **Entrada Visual:** Sube cualquier imagen (JPG, PNG) para iniciar el proceso creativo.
   * **Creatividad Lateral:** Utiliza el modelo Gemini con instrucciones de sistema diseñadas para el pensamiento abstracto y la generación de metáforas.
   * **Output Profesional:** Genera directamente el *prompt* en **inglés** listo para ser utilizado en Google AI Studio (o cualquier herramienta de desarrollo impulsada por IA).
-  * **Integración con AI Studio:** Un botón de acción rápida (`¿Quieres que desarrollemos esta app?`) copia el *prompt* y abre Google AI Studio en una nueva pestaña, facilitando el siguiente paso en el desarrollo.
+  * **Construcción:** Copia el *prompt* y abre AI Studio o Bolt con la idea prellenada. GISA no crea ni publica automáticamente una app. Los límites y las condiciones de publicación dependen de cada plataforma.
 
 ### ⚙️ Tecnología Utilizada
 
@@ -33,8 +40,8 @@ Dado que el proyecto es un solo archivo `index.html` con *scripts* en línea, la
 
 1.  **Clonar el Repositorio:**
     ```bash
-    git clone https://github.com/tu-usuario/nombre-del-repositorio.git
-    cd nombre-del-repositorio
+    git clone https://github.com/Xesco-Tejedor/GISA.git
+    cd GISA
     ```
 2.  **Abrir el Archivo:** Simplemente abre el archivo `index.html` en tu navegador web.
 
@@ -53,3 +60,7 @@ La clave de Gemini no está en el código público. La web llama a un pequeño s
 3.  Realizar tus cambios y hacer *commit* (`git commit -m 'Añadir: Funcionalidad X'`).
 4.  Subir la rama (`git push origin feature/mejora-increible`).
 5.  Abrir un *Pull Request* detallado.
+
+### Privacidad y cuotas
+
+La imagen se envía al proveedor de IA mediante el servidor intermediario. Las cuotas gratuitas pueden limitar la generación. Nunca publiques claves de API en el código del navegador.
