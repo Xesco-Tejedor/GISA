@@ -3,39 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Meta-Apps para Investigadores</title>
+    <title>GISA · Generador de Ideas Sorpresa</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-        }
-        #drop-area {
-            border: 2px dashed #9ca3af;
-            transition: all 0.2s;
-        }
-        #drop-area.highlight {
-            border-color: #10b981;
-            background-color: #f0fff4;
-        }
-        .loading-spinner {
-            border-top-color: #3b82f6;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        :root { color-scheme: dark; --carbon:#161215; --burgundy:#1f1a1d; --amber:#ffb800; --white:#f4eee5; --muted:#c4b9bd; --line:#4b3e45; --cyan:#65d8e6; }
+        * { box-sizing:border-box; }
+        body { font-family:'Space Grotesk',sans-serif; background:radial-gradient(ellipse at 14% 10%,#ffb80013,transparent 42%),radial-gradient(ellipse at 90% 75%,#6e244733,transparent 48%),var(--carbon); color:var(--white); }
+        body::before { content:''; position:fixed; width:280px; height:280px; border-radius:50%; background:#ffb80009; filter:blur(50px); top:10%; left:-100px; pointer-events:none; animation:drift 14s ease-in-out infinite; }
+        .app-shell { position:relative; background:linear-gradient(145deg,#241d22,var(--carbon)); border:1px solid var(--line); border-radius:24px; box-shadow:0 24px 70px #0005,0 0 75px #ffb8000c; margin-top:16px; animation:arrive .65s ease-out both; }
+        header { position:relative; }
+        .eyebrow { display:flex; align-items:center; justify-content:center; gap:10px; color:var(--amber); font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; margin-bottom:20px; }
+        .eyebrow::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--amber); box-shadow:0 0 14px #ffb80099; animation:pulse 3s ease-in-out infinite; }
+        h1 { color:var(--white)!important; letter-spacing:-.045em; line-height:1.15!important; }
+        h1 .brand-name { color:var(--amber); display:block; font-size:clamp(42px,8vw,64px); margin-bottom:12px; }
+        header p { max-width:610px; margin-inline:auto; line-height:1.65; }
+        .steps { display:flex; justify-content:center; flex-wrap:wrap; gap:12px 24px; margin:24px 0 0; color:var(--muted); font-size:12px; }
+        .steps b { color:var(--amber); margin-right:6px; }
+        #drop-area { border:1px dashed #8c7043; background:radial-gradient(ellipse at 50% 0,#ffb8000b,transparent 80%),var(--burgundy); transition:transform .3s,border-color .3s,box-shadow .3s; min-height:265px; border-radius:18px; }
+        #drop-area:hover,#drop-area.highlight { border-color:var(--amber); background-color:#2b231e; transform:translateY(-3px); box-shadow:0 12px 32px #ffb8000d; }
+        #drop-area>svg { color:var(--amber); }
+        [class~="text-gray-600"],[class~="text-gray-500"],[class~="text-gray-400"] { color:var(--muted)!important; }
+        [class~="text-gray-800"] { color:var(--white)!important; }
+        [class~="text-green-700"] { color:var(--amber)!important; }
+        [class~="bg-white"],[class~="bg-gray-50"] { background-color:var(--burgundy)!important; }
+        [class~="border-gray-200"],[class~="border-blue-200"],[class~="border-violet-200"] { border-color:var(--line)!important; }
+        button { min-height:44px; transition:transform .2s,background .2s,box-shadow .2s!important; }
+        button:hover { transform:translateY(-2px); }
+        button[class*="bg-blue-"] { background:var(--amber)!important; color:var(--carbon)!important; font-weight:700; box-shadow:0 6px 20px #ffb80017; }
+        button[class*="bg-blue-"]:hover { background:#ffd167!important; }
+        button[class*="bg-green-"],button[class*="bg-violet-"],button[class*="bg-gray-"] { background:#30262d!important; color:var(--white)!important; border:1px solid #76604a; }
+        button[class*="bg-green-"]:hover,button[class*="bg-violet-"]:hover,button[class*="bg-gray-"]:hover { background:#453326!important; border-color:var(--amber); }
+        button:focus-visible,#drop-area:focus-visible { outline:3px solid var(--cyan); outline-offset:4px; }
+        #result-section { border-radius:18px; background:var(--burgundy)!important; }
+        #generated-prompt { color:var(--white)!important; font-size:14px; line-height:1.75; overflow-wrap:anywhere; }
+        #result-section .shadow-inner { background:var(--carbon)!important; border:1px solid var(--line); border-radius:12px; }
+        #error-section { background:#391d25!important; border-color:#db8491!important; color:#ffc9d1!important; }
+        .loading-spinner { border-color:var(--line); border-top-color:var(--amber); animation:spin 1s linear infinite; }
+        .app-footer { border-top:1px solid var(--line); margin-top:30px; padding-top:20px; color:var(--muted); font-size:11px; line-height:1.7; text-align:center; }
+        .app-footer strong { color:var(--amber); font-weight:500; }
+        ::selection { background:var(--amber); color:var(--carbon); }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        @keyframes arrive { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes drift { 50% { transform:translate(60px,50px); } }
+        @keyframes pulse { 50% { opacity:.5; } }
+        @media(max-width:640px) { body { padding:16px!important; } .app-shell { padding:24px 20px!important; margin-top:0; border-radius:20px; } header { margin-bottom:28px!important; } h1 { font-size:24px!important; } #drop-area { padding:26px 16px!important; } #result-section { padding:20px 14px!important; } #drop-area button { margin-left:0; width:100%; } #drop-area .flex-wrap { width:100%; gap:0; } .steps { gap:10px 16px; } }
+        @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
     </style>
 </head>
 <body class="p-4 sm:p-8 md:p-12 min-h-screen flex items-start justify-center">
 
-    <div class="w-full max-w-4xl bg-white shadow-xl rounded-xl p-6 md:p-10">
+    <div class="app-shell w-full max-w-4xl shadow-xl p-6 md:p-10">
         <header class="text-center mb-10">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-700">📚 Generador de Ideas Sorpresa (Académico)</h1>
+            <div class="eyebrow">Xesco Tejedor · Laboratorio de ideas</div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-700"><span class="brand-name">GISA</span>Generador de Ideas Sorpresa<br><span class="text-lg font-medium">para el mundo académico</span></h1>
             <p class="mt-2 text-gray-600">Sube una imagen o haz una foto con la cámara para obtener un concepto de aplicación inesperada para lectores, bibliotecarios o investigadores.</p>
+            <div class="steps" aria-label="Cómo funciona"><span><b>01</b> Mira</span><span><b>02</b> Sorpréndete</span><span><b>03</b> Construye</span></div>
         </header>
 
         <!-- Input Area -->
@@ -94,6 +118,7 @@
         <div id="error-section" class="hidden mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg" role="alert">
             <p id="error-message" class="font-medium"></p>
         </div>
+        <footer class="app-footer"><strong>GISA · Xesco Tejedor</strong><br>La imagen se envía al proveedor de IA a través de un servidor intermediario. Las cuotas gratuitas pueden limitar la generación.</footer>
     </div>
 
     <!-- Camera overlay -->
